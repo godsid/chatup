@@ -9,7 +9,7 @@
 
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
-	<title>Chatloc</title>
+	<title>ChatUp</title>
   <meta name="description" content="Random location based chat, mobile web app"/>
   <meta name="keywords" content="random chat, mobile chat, chat app, location chat, location app, gps chat, gps app, random meet"/>
   
@@ -37,7 +37,7 @@
   <div data-role="page" id="menu">
     <div class="header">
       <div class="buttonLeft" onclick="info();">Info</div>
-      <div class="logo">CHATLOC</div>
+      <div class="logo">CHATUP</div>
       <div class="buttonRight" onclick="start();">Start</div>
     </div>	
     <div id="mapinfo"></div>
@@ -45,6 +45,9 @@
     <div style="width:270px; margin:0 auto; margin-top:15px;">
       <input type="range" name="distance" id="distance" value="10" min="0.2" max="100" />
     </div>
+	<ul>
+		<li><a href="joinRoom(this.value)">loc1</a></li>
+	</ul>
   </div>
 
 
@@ -60,10 +63,9 @@
 
       <span style="font-size:20px; text-shadow: 1px 1px 1px #5E5E5E; color: #FFF;">Username:</span>
       <br />
-      <input type="text" id="nickname" style="background: white;width: 100%;" />
+      <input type="text" id="nickname" style="background: white;width: 100%;" value="tui" />
       <br />
       <br />
-    
       <div id="currentusers">-</div>
     </div>
   </div>

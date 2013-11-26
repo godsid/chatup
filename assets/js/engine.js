@@ -1,7 +1,8 @@
 $(document).ready(function(){
-  findLocation();
-
-
+  //findLocation();
+  
+start();
+	
   $("#str").keypress(function(event) {
     if( event.which == 13 )
     {
@@ -198,15 +199,19 @@ function drawCircle()
 
 
 var socket;
+var iochat;
 function init()
 {
+	
   //var host = "ws://www.eminbudak.com.tr:10000/envato/chatloc/server/server.php";
-  var chat = io.connect('http://192.168.1.6/chat')
-  chat.on('connect', function () {
-	  chat.on('message', function (msg) {
+  iochat = io.connect('http://localhost:8080/chat');
+  console.log(iochat);
+  iochat.on('connect', function () {
+	  iochat.on('message', function (msg) {
 		console.log("Message: "+msg);
 	  });
   });
+  /*
   try 
   {
     socket = ("MozWebSocket" in window ? new MozWebSocket (host) : new WebSocket(host));
@@ -236,7 +241,7 @@ function init()
   catch (ex) 
   {
     console.log(ex);
-  }
+  }*/
 }
 
 
@@ -421,10 +426,11 @@ function sendmessage()
 
 function start()
 {
-  $.mobile.changePage($('#chatStart'), { transition: "fade"} );
+  //$.mobile.changePage($('#chatStart'), { transition: "fade"} );
   init();
-  overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Connecting to server...</center>');
-  setTimeout(function(){overlayKapat(); },2000);
+  started();
+  //overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Connecting to server...</center>');
+  //setTimeout(function(){overlayKapat(); },2000);
 }
 
 function started()
@@ -432,7 +438,7 @@ function started()
   if($('#nickname').val()!="")
   {
    $.mobile.changePage($('#chatStarted'), { transition: "fade"} );
-   send({'action':'login', 'username':$('#nickname').val(), 'latitude':marker.getPosition().lat(), 'longitude':marker.getPosition().lng(),'distance':$('#distance').val()}); 
+   //send({'action':'login', 'username':$('#nickname').val(), 'latitude':marker.getPosition().lat(), 'longitude':marker.getPosition().lng(),'distance':$('#distance').val()}); 
   }
   else
   {

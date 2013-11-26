@@ -13,7 +13,6 @@ var rooms = [   {name:'loc1',lat:100.5257415,lng:13.7244345,members:{count:0,lis
 var chat = io
   .of('/chat')
   .on('connection', function (socket) {
-    roomName = getRoom('xxx');
     socket.join(roomName);
     socket.broadcast.to(roomName).emit('message','New User join');
     console.log('New User join');
