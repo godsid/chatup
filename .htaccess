@@ -1,0 +1,5 @@
+#RewriteEngine on
+#RewriteCond $1 !^(index\.php|images|robots\.txt|_design|assets|imageservice\.php|clear_cache\.php|html_tpl)
+#RewriteRule ^(.*)$ /index.php/$1 [L]
+
+Header set Access-Control-Allow-Origin *
