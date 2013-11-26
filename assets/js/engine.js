@@ -207,9 +207,22 @@ function init()
   iochat = io.connect('http://localhost:8080/chat');
   console.log(iochat);
   iochat.on('connect', function () {
+    console.log('Connected');
+    iochat.emit('find room',{lat: 100.6206178,lng: 13.8349631,dist:5000});
+
+    iochat.on('find room',function(rooms){
+      console.log('find room'+JSON.stringify(rooms));
+      iochat.emit('join room',{name:rooms.lists[0].name});  
+      iochat.send('ssss');      
+    });
+
+    
+
 	  iochat.on('message', function (msg) {
-		console.log("Message: "+msg);
+		  console.log("Recv: "+msg);
 	  });
+
+    
   });
   /*
   try 
