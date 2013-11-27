@@ -1,8 +1,7 @@
 $(document).ready(function(){
   //findLocation();
-  
-start();
-	
+  login();
+	//start();
   $("#str").keypress(function(event) {
     if( event.which == 13 )
     {
@@ -11,8 +10,6 @@ start();
     }
   });
 
-
-
   $("#nickname").keypress(function(event) {
     if( event.which == 13 )
     {
@@ -20,10 +17,57 @@ start();
       started();
     }
   });
-  
 });
 
 
+
+function login(){
+	overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
+	window.fbAsyncInit = function() {
+		console.log("FB.init");
+		FB.init({
+			appId      : '202755173188388',
+			status     : true, // check login status
+			cookie     : true, // enable cookies to allow the server to access the session
+			xfbml      : false  // parse XFBML
+		});
+		if(FB.getAuthResponse()==null){
+			overlayKapat();
+		}
+		FB.Event.subscribe('auth.authResponseChange', function(response) {
+			if (response.status === 'connected') {
+				console.log("FB is login");
+				FB.api('/me',function(resp){
+					overlayKapat();
+					localStorage.user = resp;
+				});
+			}else{
+				console.log("FB not login");
+				overlayKapat();
+			}
+		});
+	};
+
+	if(typeof FB === 'undefined'){
+		(function(d){
+		   var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+		   if (d.getElementById(id)) {return;}
+		   js = d.createElement('script'); js.id = id; js.async = true;
+		   js.src = "//connect.facebook.net/th_TH/all.js";
+		   ref.parentNode.insertBefore(js, ref);
+		  }(document));
+	}
+}
+function FBlogin(){
+	console.log("Login");
+	if(FB.getAuthResponse()==null){
+		FB.login(function(resp){
+			
+		});
+	}else{
+		
+	}
+}
 function findLocation()
 {
   overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
@@ -61,11 +105,6 @@ function findLocation()
 
   },{maximumAge:60000, timeout:5000, enableHighAccuracy:true});  
 }
-
-
-
-
-
 
 
 var map;
@@ -200,6 +239,7 @@ function drawCircle()
 
 var socket;
 var iochat;
+var roomlist;
 function init()
 {
 	
@@ -208,22 +248,53 @@ function init()
   console.log(iochat);
   iochat.on('connect', function () {
     console.log('Connected');
-    iochat.emit('find room',{lat: 100.6206178,lng: 13.8349631,dist:5000});
+    iochat.emit('find room',{lat: 100.5778096,lng: 13.8928782,dist:5000});
 
+	/*****************************************
+	** find room
+	*****************************************/
     iochat.on('find room',function(rooms){
-      console.log('find room'+JSON.stringify(rooms));
-      iochat.emit('join room',{name:rooms.lists[0].name});  
-      iochat.send('ssss');      
+		console.log('find room'+JSON.stringify(rooms));
+		var roomsList = "";
+		if(rooms.length){
+			for(var i=0;i<rooms.length;i++){
+				roomsList+='<li><a href="'+rooms[i].name+'">'+rooms[i].name+'</a></li>';
+			}
+			$(".roomsList").html("<ul>"+roomsList+"</ul>");
+		}
+      iochat.emit('join room',{name:rooms[0].name,user:{name:'Userxxx'}});
     });
+	/*****************************************/
+	
+	/*****************************************
+	** update room
+	*****************************************/
+	iochat.on('update room',function(recv){
+		console.log('update room: '+JSON.stringify(recv));
+	});
+	/*****************************************/
 
-    
 
-	  iochat.on('message', function (msg) {
-		  console.log("Recv: "+msg);
-	  });
-
-    
+    /*****************************************
+	** new member on room
+	*****************************************/
+	iochat.on('join room',function(recv){
+		console.log('join room: '+JSON.stringify(recv));
+	});
+	/*****************************************/
+	
+    /*****************************************
+	** on chat message
+	*****************************************/
+	iochat.on('message', function (msg) {
+		console.log("Recv: "+msg);
+	});
+	
+	
+	/*****************************************/
   });
+
+
   /*
   try 
   {
@@ -526,3 +597,4 @@ function overlayGoster(msg)
   var overlay = $('<div id="overlay" onclick="overlayKapat();">'+msg+'</div>');
   overlay.appendTo(document.body);  
 }
+

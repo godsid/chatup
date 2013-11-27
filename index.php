@@ -33,7 +33,18 @@
 
 </head>
 <body>
-  
+  <div data-role="page" id="login">
+    <div class="header">
+      <div class="logo">CHATUP</div>
+    </div>
+	<div class="login-group">
+		<div id="fb-root"></div>
+		<a href="#" onclick="FBlogin()" class="fb-login">Login with Facebook</a>
+		<a href="#" class="gplus-login">Login with Google+</a>
+	</div>
+  </div>
+
+
   <div data-role="page" id="menu">
     <div class="header">
       <div class="buttonLeft" onclick="info();">Info</div>
@@ -55,7 +66,7 @@
   <div data-role="page" id="chatStart">
     <div class="header">
       <div class="buttonLeft" onclick="menu();">Menu</div>
-      <div class="logo">CHATLOC</div>
+      <div class="logo">ChatUp</div>
       <div class="buttonRight" onclick="started();">Chat</div>
     </div>	
     
@@ -74,7 +85,7 @@
   <div data-role="page" id="chatStarted">
     <div class="header">
       <div class="buttonLeft" onclick="menu();">Menu</div>
-      <div class="logo">CHATLOC</div>
+      <div class="logo">ChatUp</div>
     </div>	
     <div id="chatinfo"></div>
 
@@ -83,12 +94,14 @@
       <input type="text" id="str" style="background: white;width: 70%;float: left;" />
       <button onclick="sendmessage();">Send</button>
     </div>
+	<div class="roomsList">
+	</div>
   </div>
   
   <div data-role="page" id="info">
     <div class="header">
       <div class="buttonLeft" onclick="menu();">Menu</div>
-      <div class="logo">CHATLOC</div>
+      <div class="logo">ChatUp</div>
     </div>	
     
     <div id="infoDiv">

@@ -1,24 +1,23 @@
-
-var 	mongoose = require('mongoose'),
+var mongoose = require('mongoose'),
 	io = require('socket.io').listen(8080,{
-        	heartbeats:true,
-        	'log level':0
-		});
+		heartbeats:true,
+		'log level':0
+	});
 
 
 mongoose.connect('mongodb://localhost/chatup',function(err){
 	if(err){
-	 console.log(err);
+		console.log(err);
 	}else{
 		console.log("Connect to mongodb/chatup");
 	}
 });
 
 var roomsSchema = mongoose.Schema({
-    name: String,
+	name: String,
     loc: {lat: Number,lng: Number},
-    memberCount: Number,
-    created: {type: Date, Default: Date.now}
+	memberCount: Number,
+	created: {type: Date, Default: Date.now}
 });
 
 var messagesSchema = mongoose.Schema({
@@ -29,63 +28,101 @@ var messagesSchema = mongoose.Schema({
 });
 
 var membersSchema = mongoose.Schema({
-  nick: String,
-  loc: {lat: Number,lng: Number},
+	nick: String,
+	loc: {lat: Number,lng: Number},
 })
 
 var Rooms = mongoose.model('rooms',roomsSchema);
 var Messages = mongoose.model('messages',messagesSchema);
 var Members = mongoose.model('members',membersSchema);
 
-
-
-
-//new Messages({from:'tui',msg:'test',room:'room1'}).save();
-
-//newMessage.save(function(err){
-//  if(err) throw err;
-//});
-/* *
- * io.set('heartbeats',false);
- * */
-var roomsDefault = Array(
-                {name: "room1",
-                loc: {lat: 100.6206392,lng: 13.8353902},
-                memberCount: 0,
-                created: (Date.now())}
-                ,
-                {name: "room2",
-                loc: {lat: 100.6206178,lng: 13.8349631},
-                memberCount: 0,
-                created: (Date.now())}
-        );
-
 var chat = io
   .of('/chat')
   .on('connection', function (socket) {
-	  
+	/*****************************************
+	** On new connect
+	******************************************/
     //socket.join(roomName);
     //socket.broadcast.to(roomName).emit('message','New User join');
     console.log('New User Connect');
-    
-    
-    socket.on('find room',function(recv){
-      console.log('Find room: '+JSON.stringify(recv));
-      socket.emit('find room',{lists:roomsDefault});  
+	/****************************************/
+
+    /****************************************
+	** Search rooms on near your location
+	****************************************/
+	socket.on('find room',function(recv){
+		console.log('Find room: '+JSON.stringify(recv));
+		Rooms.find({"loc":{
+						$near:{type:"Point",coordinates:[recv.lat,recv.lng]},
+						$maxDistance:recv.dist}
+					})
+				//.select('name loc memberCount')
+				.limit(20)
+				.exec(function(err,list){
+					if(err) throw err;
+					socket.emit('find room',list);
+		});
     });
-
-    socket.on('join room',function(recv){
-      console.log('join room: '+JSON.stringify(recv));
-      socket.join(recv.name);
-
-      socket.broadcast.emit('message','New User Join');
+	/****************************************/
+	
+	/****************************************
+	** Create rooms 
+	****************************************/
+	socket.on('create room',function(recv){
+		console.log('create room: '+JSON.stringify(recv));
+		= new Rooms({
+				name:recv.name,
+				loc:{lat:recv.lat,lng:recv.lng},
+				memberCount:0,
+				created:Date.now()
+			}).save();
+		
+		/*socket.join(recv.name);
+		Rooms.findOneAndUpdate({name:recv.name},{$inc:{memberCount:1}},true,function(err,resp){
+			console.log("Update room: "+JSON.stringify(resp));
+			socket.broadcast.emit('update room',{room:resp,newMember:recv.user.name});
+		});
+		*/
 
     });
+	/****************************************/
 
-    socket.on('message',function(msg){
+
+	/****************************************
+	** Join rooms 
+	****************************************/
+	socket.on('join room',function(recv){
+		
+		console.log('join room: '+JSON.stringify(recv));
+		socket.join(recv.name);
+		
+		Rooms.findOneAndUpdate({name:recv.name},{$inc:{memberCount:1}},true,function(err,resp){
+			console.log("Update room: "+JSON.stringify(resp));
+			socket.broadcast.emit('update room',{room:resp,newMember:recv.user.name});
+		});
+
+    });
+	/****************************************/
+	
+	/****************************************
+	** Leave rooms 
+	****************************************/
+	socket.on('leave room',function(recv){
+		
+		console.log('leave room: '+JSON.stringify(recv));
+		socket.leave(recv.name);
+		Rooms.findOneAndUpdate({name:recv.name},{$dec:{memberCount:1}},true,function(err,resp){
+			
+			console.log("Update room: "+JSON.stringify(resp));
+			socket.broadcast.emit('update room',{room:resp,leftMember:"xxx"});
+		});
+    });
+	/****************************************/
+	
+    socket.on('message',function(recv){
         //socket.broadcast.to('room1').emit('message',msg);
-        console.log('Recv: '+msg);
-        console.log(socket);
+        console.log('Recv: '+JSON.stringify(recv));
+        //console.log(socket);
         //socket.send(msg);
     });
   });
