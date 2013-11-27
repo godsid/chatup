@@ -21,7 +21,7 @@ body
   font-family: 'Merriweather Sans', sans-serif;
 
 }
-.login-group{position:absolute;top:300px;text-align:center;}
+.login-group{display:none;position:relative;top:300px;text-align:center;}
 .login-group a{}
 .fb-login{display: inline-block;height: 63px;margin: 0 auto;text-indent: -9999px;width: 303px;background: url(../img/ic-regis.png) 0 0 no-repeat;}
 .gplus-login{display: inline-block;height: 63px;margin: 0 auto;text-indent: -9999px;width: 303px;background: url(../img/ic-regis.png) 0 -160px no-repeat;}

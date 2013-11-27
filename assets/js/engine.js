@@ -22,7 +22,7 @@ $(document).ready(function(){
 
 
 function login(){
-	overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
+	loading('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
 	window.fbAsyncInit = function() {
 		console.log("FB.init");
 		FB.init({
@@ -32,18 +32,22 @@ function login(){
 			xfbml      : false  // parse XFBML
 		});
 		if(FB.getAuthResponse()==null){
-			overlayKapat();
+			$('.login-group').show();
+      unloading();
+
 		}
 		FB.Event.subscribe('auth.authResponseChange', function(response) {
 			if (response.status === 'connected') {
 				console.log("FB is login");
 				FB.api('/me',function(resp){
-					overlayKapat();
+					unloading();
 					localStorage.user = resp;
+          findLocation();
 				});
 			}else{
 				console.log("FB not login");
-				overlayKapat();
+        $('.login-group').show();
+				unloading();
 			}
 		});
 	};
@@ -62,22 +66,21 @@ function FBlogin(){
 	console.log("Login");
 	if(FB.getAuthResponse()==null){
 		FB.login(function(resp){
-			
+			findLocation();
 		});
 	}else{
-		
+		findLocation();
 	}
 }
 function findLocation()
 {
-  overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
+  loading('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
 
-  navigator.geolocation.getCurrentPosition(function(position){  
-  
+  navigator.geolocation.getCurrentPosition(function(position){
     overlayKapat();
     coords = position.coords || position.coordinate || position;
     createMap(coords.latitude,coords.longitude)
-      
+          
   },function(error){ 
 
     var msg;
@@ -117,7 +120,7 @@ var place;
 
 function createMap(yenilat,yenilong)
 {     
-
+  console.log("create map");
     centerPoint = new google.maps.LatLng(yenilat, yenilong);
 
     var myOptions = {
@@ -596,5 +599,12 @@ function overlayGoster(msg)
   overlayKapat();
   var overlay = $('<div id="overlay" onclick="overlayKapat();">'+msg+'</div>');
   overlay.appendTo(document.body);  
+}
+function loading(msg){
+  overlayGoster(msg);
+  $('#overlay').css('opacity',1);
+}
+function unloading(){
+  overlayKapat();
 }
 

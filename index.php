@@ -33,33 +33,36 @@
 
 </head>
 <body>
+  <!-- Page Login -->
   <div data-role="page" id="login">
     <div class="header">
       <div class="logo">CHATUP</div>
     </div>
-	<div class="login-group">
-		<div id="fb-root"></div>
-		<a href="#" onclick="FBlogin()" class="fb-login">Login with Facebook</a>
-		<a href="#" class="gplus-login">Login with Google+</a>
-	</div>
+  <div class="login-group">
+    <div id="fb-root"></div>
+      <p><a href="#" onclick="FBlogin()" class="fb-login">Login with Facebook</a></p>
+      <p><a href="#" class="gplus-login">Login with Google+</a></p>
   </div>
+</div>
+<!-- /Page Login -->
 
-
-  <div data-role="page" id="menu">
-    <div class="header">
-      <div class="buttonLeft" onclick="info();">Info</div>
-      <div class="logo">CHATUP</div>
-      <div class="buttonRight" onclick="start();">Start</div>
-    </div>	
-    <div id="mapinfo"></div>
-    <div id="map_canvas"></div>
-    <div style="width:270px; margin:0 auto; margin-top:15px;">
-      <input type="range" name="distance" id="distance" value="10" min="0.2" max="100" />
-    </div>
-	<ul>
-		<li><a href="joinRoom(this.value)">loc1</a></li>
-	</ul>
+<!-- Page Menu -->
+<div data-role="page" id="menu">
+  <div class="header">
+    <div class="buttonLeft" onclick="info();">Info</div>
+    <div class="logo">CHATUP</div>
+    <div class="buttonRight" onclick="start();">Start</div>
+  </div>	
+  <div id="mapinfo"></div>
+  <div id="map_canvas"></div>
+  <div style="width:270px; margin:0 auto; margin-top:15px;">
+    <input type="range" name="distance" id="distance" value="10" min="0.2" max="100" />
   </div>
+  <ul>
+    <li><a href="joinRoom(this.value)">loc1</a></li>
+  </ul>
+</div>
+<!-- /Page Menu -->
 
 
   
