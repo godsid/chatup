@@ -22,32 +22,35 @@
   <script src="lib/jquery-1.8.2.min.js"></script>
   <script src="lib/jquery.mobile-1.2.0.min.js"></script>
   
-  <script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+  <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyC_VJwNCixstl7DITXMtj4vpCkVarVaX8Q&sensor=false" type="text/javascript"></script>
   <script src="plugins/geometa.js"></script>
-            
+
   <script src="lib/socket.io.min.js"></script> 
   <script src="assets/js/engine.js"></script>
-
-            
-            
-
 </head>
 <body>
-  <!-- Page Login -->
-  <div data-role="page" id="login">
+
+  <!-- Page splash -->
+  <div data-role="page" id="splash">
+    <h1>Chat UP</h1>
+  </div>
+  <!-- /Page splash -->
+
+  <!-- Page Register -->
+  <div data-role="page" id="register">
     <div class="header">
       <div class="logo">CHATUP</div>
     </div>
   <div class="login-group">
     <div id="fb-root"></div>
       <p><a href="#" onclick="FBlogin()" class="fb-login">Login with Facebook</a></p>
-      <p><a href="#" class="gplus-login">Login with Google+</a></p>
+      <!--<p><a href="#" class="gplus-login">Login with Google+</a></p>-->
   </div>
 </div>
-<!-- /Page Login -->
+<!-- /Page Register -->
 
 <!-- Page Menu -->
-<div data-role="page" id="menu">
+<div data-role="page" id="rooms">
   <div class="header">
     <div class="buttonLeft" onclick="info();">Info</div>
     <div class="logo">CHATUP</div>
@@ -58,33 +61,12 @@
   <div style="width:270px; margin:0 auto; margin-top:15px;">
     <input type="range" name="distance" id="distance" value="10" min="0.2" max="100" />
   </div>
-  <ul>
-    <li><a href="joinRoom(this.value)">loc1</a></li>
-  </ul>
+  <div class="roomsList">
+    
+  </div>
 </div>
 <!-- /Page Menu -->
 
-
-  
-  <div data-role="page" id="chatStart">
-    <div class="header">
-      <div class="buttonLeft" onclick="menu();">Menu</div>
-      <div class="logo">ChatUp</div>
-      <div class="buttonRight" onclick="started();">Chat</div>
-    </div>	
-    
-    <div id="chatStartDiv">
-
-      <span style="font-size:20px; text-shadow: 1px 1px 1px #5E5E5E; color: #FFF;">Username:</span>
-      <br />
-      <input type="text" id="nickname" style="background: white;width: 100%;" value="tui" />
-      <br />
-      <br />
-      <div id="currentusers">-</div>
-    </div>
-  </div>
-
-  
   <div data-role="page" id="chatStarted">
     <div class="header">
       <div class="buttonLeft" onclick="menu();">Menu</div>
@@ -97,8 +79,6 @@
       <input type="text" id="str" style="background: white;width: 70%;float: left;" />
       <button onclick="sendmessage();">Send</button>
     </div>
-	<div class="roomsList">
-	</div>
   </div>
   
   <div data-role="page" id="info">

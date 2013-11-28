@@ -1,28 +1,33 @@
+var user = {};
+var defaultDistance = 1000;
+user.distance = defaultDistance;
 $(document).ready(function(){
-  //findLocation();
-  login();
-	//start();
+  if(location.hash==''){
+    splash();
+  }
+  
   $("#str").keypress(function(event) {
     if( event.which == 13 )
     {
       $("#str").blur();
       sendmessage();
-    }
-  });
-
-  $("#nickname").keypress(function(event) {
-    if( event.which == 13 )
-    {
-      $("#nickname").blur();
-      started();
+      $("#str").focus();
     }
   });
 });
 
+function splash(){
+  console.log("Page splash");
+  setTimeout(function(){
+    $.mobile.changePage($('#register'), { transition: "fade"} );
+    register();
+  },1);
+}
 
-
-function login(){
-	loading('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
+function register(){
+  console.log("Page register");
+	loading();
+  $('.login-group').hide();
 	window.fbAsyncInit = function() {
 		console.log("FB.init");
 		FB.init({
@@ -31,18 +36,21 @@ function login(){
 			cookie     : true, // enable cookies to allow the server to access the session
 			xfbml      : false  // parse XFBML
 		});
+    
 		if(FB.getAuthResponse()==null){
+      console.log("FB.getAuthResponse is null");
 			$('.login-group').show();
       unloading();
-
 		}
 		FB.Event.subscribe('auth.authResponseChange', function(response) {
+      console.log("auth.authResponseChange:"+response.status);
 			if (response.status === 'connected') {
-				console.log("FB is login");
 				FB.api('/me',function(resp){
 					unloading();
-					localStorage.user = resp;
-          findLocation();
+					user = resp;
+          unloading();
+          $.mobile.changePage($('#rooms'), { transition: "fade"} );
+          rooms();
 				});
 			}else{
 				console.log("FB not login");
@@ -53,6 +61,7 @@ function login(){
 	};
 
 	if(typeof FB === 'undefined'){
+    console.log("FB undefined");
 		(function(d){
 		   var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
 		   if (d.getElementById(id)) {return;}
@@ -63,26 +72,28 @@ function login(){
 	}
 }
 function FBlogin(){
-	console.log("Login");
+	console.log("Click FB Login");
 	if(FB.getAuthResponse()==null){
 		FB.login(function(resp){
-			findLocation();
+			$.mobile.changePage($('#rooms'), { transition: "fade"} );
+      rooms();
 		});
 	}else{
-		findLocation();
+		$.mobile.changePage($('#rooms'), { transition: "fade"} );
+    rooms();
 	}
 }
-function findLocation()
+function rooms()
 {
-  loading('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting coordinate...</center>');
-
+  console.log("page rooms");
   navigator.geolocation.getCurrentPosition(function(position){
-    overlayKapat();
-    coords = position.coords || position.coordinate || position;
-    createMap(coords.latitude,coords.longitude)
-          
-  },function(error){ 
 
+    coords = position.coords || position.coordinate || position;
+    console.log("position:"+JSON.stringify(coords));
+    user.loc = coords;
+    createMap(coords.latitude,coords.longitude);
+
+  },function(error){ 
     var msg;
     switch(error.code) 
     {
@@ -101,12 +112,8 @@ function findLocation()
       default:
         msg = "Location detection not supported in browser";
     }
-    
-   overlayGoster(msg);
-   
-   findLocation();
-
-  },{maximumAge:60000, timeout:5000, enableHighAccuracy:true});  
+    rooms();
+  },{maximumAge:60000, timeout:5000, enableHighAccuracy:true});
 }
 
 
@@ -119,19 +126,16 @@ var marker;
 var place;
 
 function createMap(yenilat,yenilong)
-{     
+{
   console.log("create map");
-    centerPoint = new google.maps.LatLng(yenilat, yenilong);
-
+  centerPoint = new google.maps.LatLng(yenilat, yenilong);
     var myOptions = {
       zoom: 17,
       center: centerPoint,
       disableDefaultUI: true,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-          
-    map = new google.maps.Map(document.getElementById("map_canvas"),myOptions);     
-
+    map = new google.maps.Map(document.getElementById("map_canvas"),myOptions);
 
     map.setCenter(centerPoint);
     map.setZoom(17);
@@ -143,11 +147,6 @@ function createMap(yenilat,yenilong)
         title: 'Why, there you are!'
       });
     
-    setTimeout(function(){
-      overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Getting location...</center>');
-    },1000);
-    
-    
     infowindow = new google.maps.InfoWindow({content: 'You are here'});
     
     google.maps.event.addListener(marker, 'click', function() {
@@ -158,11 +157,12 @@ function createMap(yenilat,yenilong)
       centerPoint=marker.getPosition();
       drawCircle();
     });
-          
+    
     // And reverse geocode.
     (new google.maps.Geocoder()).geocode({latLng: centerPoint}, function(resp) {
       place = "";
       if (resp[0]) {
+        user.place = resp[0];
         var bits = [];
         for (var i = 0, I = resp[0].address_components.length; i < I; ++i) {
           var component = resp[0].address_components[i];
@@ -175,19 +175,12 @@ function createMap(yenilat,yenilong)
         }
         marker.setTitle(resp[0].formatted_address);
       }
-      //overlayGoster(place);
-      setTimeout(function(){overlayGoster('<br /><br /><center><img src="assets/img/loading.gif" border="0"><br /><br />Loading map...</center>')},2000);
-      setTimeout(function(){overlayKapat(); },4000);
     });
-    
-    
-    
+  
     drawCircle();
     
     $('#mapinfo').html('<img src="assets/img/icon-search.png" /> Search Distance: '+$('#distance').val()+' km');
-    
-    
-    
+
     $("input#distance").live("change", function() {
       if($('#distance').val() < 1)
       {
@@ -208,10 +201,14 @@ function createMap(yenilat,yenilong)
         }
       }
       drawCircle();
-    });       
+    }); 
+
+    init();
 }
 
+function addMaker(){
 
+}
 function drawCircle() 
 {
   if (circle) { circle.setMap(null);  }
@@ -227,46 +224,38 @@ function drawCircle()
   };
 
   circle = new google.maps.Circle(circleOptions);
-
   map.fitBounds(circle.getBounds());
 }
-
-
-
-
-
-
-
-
-
 
 var socket;
 var iochat;
 var roomlist;
 function init()
 {
-	
   //var host = "ws://www.eminbudak.com.tr:10000/envato/chatloc/server/server.php";
   iochat = io.connect('http://localhost:8080/chat');
   console.log(iochat);
   iochat.on('connect', function () {
     console.log('Connected');
-    iochat.emit('find room',{lat: 100.5778096,lng: 13.8928782,dist:5000});
-
-	/*****************************************
-	** find room
-	*****************************************/
+  
+    /*****************************************
+    ** find room
+    *****************************************/
+    iochat.emit('find room',{lat: user.loc.latitude,lng: user.loc.longitude,dist:user.distance});
+    
     iochat.on('find room',function(rooms){
-		console.log('find room'+JSON.stringify(rooms));
-		var roomsList = "";
-		if(rooms.length){
-			for(var i=0;i<rooms.length;i++){
-				roomsList+='<li><a href="'+rooms[i].name+'">'+rooms[i].name+'</a></li>';
+      console.log('find room'+JSON.stringify(rooms));
+      var roomsList = "";
+      if(rooms.length){
+          for(var i=0;i<rooms.length;i++){
+          roomsList+='<li onclick="chatStarted(\''+rooms[i].name+'\')">'+rooms[i].name+' ('+rooms[i].memberCount+')</li>';
 			}
 			$(".roomsList").html("<ul>"+roomsList+"</ul>");
-		}
-      iochat.emit('join room',{name:rooms[0].name,user:{name:'Userxxx'}});
-    });
+		}else{
+    
+      //iochat.emit('join room',{name:rooms[0].name,user:{name:'Userxxx'}});
+    }
+  });
 	/*****************************************/
 	
 	/*****************************************
@@ -290,7 +279,9 @@ function init()
 	** on chat message
 	*****************************************/
 	iochat.on('message', function (msg) {
+    console.log(JSON.stringify(msg));
 		console.log("Recv: "+msg);
+    shwoMessage(msg);
 	});
 	
 	
@@ -332,9 +323,17 @@ function init()
 }
 
 
+function chatStarted(room){
+  if(room=='undefined'){
+    $.mobile.changePage($('#rooms'), { transition: "fade"});
+    rooms();
+    return false;
+  }
+  $.mobile.changePage($('#chatStarted'), { transition: "fade"});
+  iochat.emit('join room',{name:room,user:{name:user.name,avatar:getUserAvatar()}});
 
 
-
+}
 
 function chat(msg)
 {  
@@ -438,7 +437,7 @@ function send(value)
 
   try 
   {
-    socket.send(value);
+    iochat.emit('message',{msg:value,user:{name:user.name,avatar:getUserAvatar()}});
     console.log('Sent: ' + value);
   }
   catch (ex) 
@@ -462,11 +461,12 @@ function quit ()
 var sendmessageallow = 0;
 function sendmessage()
 {
-  if(sendmessageallow=='1')
-  {
+  //if(sendmessageallow=='1')
+  //{
     if(str!='')
     {
-    send({'action':'chat', 'text':$('#str').val()});
+      send($('#str').val());
+      //send({'action':'chat', 'text':$('#str').val()});
     }
     else
     {
@@ -476,7 +476,7 @@ function sendmessage()
       icerik += 'You should not send blank message.';
       overlayGoster(icerik);
     }
-  }
+  /*}
   else
   {
     var icerik = '';
@@ -484,29 +484,16 @@ function sendmessage()
     icerik += '<br /><br />';
     icerik += 'You should connected someone to send message.';
     overlayGoster(icerik);
-  }
+  }*/
+}
+
+function shwoMessage(recv){
+  $('#chat').append('<p class="msg me"><img src="'+recv.user.avatar+'" /><i>'+recv.user.name+'</i><span>'+recv.msg+'</span></p>');
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  
-      
-      
-      
 
 
 
@@ -600,11 +587,15 @@ function overlayGoster(msg)
   var overlay = $('<div id="overlay" onclick="overlayKapat();">'+msg+'</div>');
   overlay.appendTo(document.body);  
 }
-function loading(msg){
-  overlayGoster(msg);
-  $('#overlay').css('opacity',1);
+function loading(){
+    unloading();
+    var loadingEle = $('<div id="loading"><img src="assets/img/loading.gif" /></div>');
+    loadingEle.appendTo(document.body);
 }
 function unloading(){
-  overlayKapat();
+  $("#loading").remove();
 }
 
+function getUserAvatar(){
+  return 'http://graph.facebook.com/'+user.id+'/picture?type=square';
+}

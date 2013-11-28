@@ -70,7 +70,7 @@ var chat = io
 	****************************************/
 	socket.on('create room',function(recv){
 		console.log('create room: '+JSON.stringify(recv));
-		= new Rooms({
+		new Rooms({
 				name:recv.name,
 				loc:{lat:recv.lat,lng:recv.lng},
 				memberCount:0,
@@ -95,9 +95,10 @@ var chat = io
 		
 		console.log('join room: '+JSON.stringify(recv));
 		socket.join(recv.name);
-		
+		socket.room = recv.name;
 		Rooms.findOneAndUpdate({name:recv.name},{$inc:{memberCount:1}},true,function(err,resp){
 			console.log("Update room: "+JSON.stringify(resp));
+      console.log(recv.user.name);
 			socket.broadcast.emit('update room',{room:resp,newMember:recv.user.name});
 		});
 
@@ -112,24 +113,34 @@ var chat = io
 		console.log('leave room: '+JSON.stringify(recv));
 		socket.leave(recv.name);
 		Rooms.findOneAndUpdate({name:recv.name},{$dec:{memberCount:1}},true,function(err,resp){
-			
 			console.log("Update room: "+JSON.stringify(resp));
 			socket.broadcast.emit('update room',{room:resp,leftMember:"xxx"});
 		});
     });
 	/****************************************/
-	
     socket.on('message',function(recv){
-        //socket.broadcast.to('room1').emit('message',msg);
         console.log('Recv: '+JSON.stringify(recv));
-        //console.log(socket);
-        //socket.send(msg);
+        console.log("Room:"+socket.room);
+        socket.in(socket.room).emit('message',recv);
+        socket.broadcast.to(socket.room).emit('message',recv);
     });
+
+  socket.on('disconnect',function(){
+    if(socket.room!='undefined'){
+      console.log(socket.room);
+      Rooms.findOneAndUpdate({name:socket.room},{$inc:{memberCount:-1}},true,function(err,resp){
+        if(err){
+          console.log(err);
+        }else{
+          console.log("Update room: "+JSON.stringify(resp));
+          socket.broadcast.emit('update room',{room:resp,leftMember:"xxx"});  
+        }
+      });
+      socket.leave(socket.room);
+    }
+    console.log("Disconnect");
   });
-
-
-
-
+});
 
 
 var news = io
