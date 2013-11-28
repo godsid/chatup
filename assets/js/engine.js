@@ -241,7 +241,7 @@ function init()
     /*****************************************
     ** find room
     *****************************************/
-    iochat.emit('find room',{lat: user.loc.latitude,lng: user.loc.longitude,dist:user.distance});
+    iochat.emit('find room',{lat: user.loc.latitude,lng: user.loc.longitude,dist:user.distance,palce:user.palce.formatted_address});
     
     iochat.on('find room',function(rooms){
       console.log('find room'+JSON.stringify(rooms));

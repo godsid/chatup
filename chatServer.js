@@ -16,6 +16,7 @@ mongoose.connect('mongodb://localhost/chatup',function(err){
 var roomsSchema = mongoose.Schema({
 	name: String,
     loc: {lat: Number,lng: Number},
+    palce: String,
 	memberCount: Number,
 	created: {type: Date, Default: Date.now}
 });
@@ -60,7 +61,19 @@ var chat = io
 				.limit(20)
 				.exec(function(err,list){
 					if(err) throw err;
-					socket.emit('find room',list);
+					if(list.length){
+						socket.emit('find room',list);	
+					}else{
+						console.log('create room: ');
+						new Rooms({
+							name: Date.now(),
+							loc: {lat:recv.lat,lng:recv.lng},
+							pace: recv.palce,
+							memberCount: 0,
+							created: Date.now()
+						}).save();
+					}
+					
 		});
     });
 	/****************************************/
@@ -73,6 +86,7 @@ var chat = io
 		new Rooms({
 				name:recv.name,
 				loc:{lat:recv.lat,lng:recv.lng},
+				palce: recv.palce,
 				memberCount:0,
 				created:Date.now()
 			}).save();
