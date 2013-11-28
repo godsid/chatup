@@ -64,14 +64,17 @@ var chat = io
 					if(list.length){
 						socket.emit('find room',list);	
 					}else{
-						console.log('create room: ');
-						new Rooms({
+						var newRoomName = {
 							name: Date.now(),
 							loc: {lat:recv.lat,lng:recv.lng},
 							pace: recv.palce,
-							memberCount: 0,
+							memberCount: 1,
 							created: Date.now()
-						}).save();
+						};
+						console.log('create room: '+newRoomName);
+
+						new Rooms(newRoomName).save();
+						socket.emit('find room',newRoomName);
 					}
 					
 		});
