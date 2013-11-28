@@ -233,7 +233,7 @@ var roomlist;
 function init()
 {
   //var host = "ws://www.eminbudak.com.tr:10000/envato/chatloc/server/server.php";
-  iochat = io.connect('http://localhost:8080/chat');
+  iochat = io.connect('http://'+location.host+':8080/chat');
   console.log(iochat);
   iochat.on('connect', function () {
     console.log('Connected');
